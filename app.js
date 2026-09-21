@@ -4,6 +4,7 @@ const agentPrompt = document.getElementById('agentPrompt');
 const runAgentBtn = document.getElementById('runAgent');
 const quickActionBtn = document.getElementById('quickAction');
 const simulateClickBtn = document.getElementById('simulateClick');
+const planActionBtn = document.getElementById('planAction');
 const resetPromptBtn = document.getElementById('resetPrompt');
 const resultBox = document.getElementById('resultBox');
 const statusBadge = document.getElementById('statusBadge');
@@ -12,6 +13,11 @@ const pageLinkButtons = document.querySelectorAll('.page-link-btn');
 const historyList = document.getElementById('historyList');
 
 const sessionHistory = [];
+const agentMemory = {
+  lastTask: '',
+  currentPage: '',
+  plan: []
+};
 
 function updateStatus(label, tone = 'success') {
   statusBadge.textContent = label;
@@ -67,6 +73,36 @@ function getCurrentPageInfo() {
     cards,
     url: window.location.href
   };
+}
+
+function planNextStep() {
+  const page = getCurrentPageInfo();
+  const plan = [
+    `1. Inspect page: ${page.title}`,
+    '2. Extract structured product/service data',
+    '3. Summarize user intent and conversion path',
+    '4. Recommend the safest next action',
+    '5. Log the outcome and store the task in memory'
+  ];
+
+  agentMemory.plan = plan;
+  resultBox.textContent = `Plan:\n${plan.join('\n')}`;
+  addHistory('Plan generated');
+  updateStatus('Plan ready', 'success');
+}
+
+function confirmAction(actionName) {
+  const allowed = ['readPage', 'summary', 'extractData', 'audit', 'clickCTA', 'fillForm', 'navigate'];
+  if (!allowed.includes(actionName)) {
+    resultBox.textContent = `confirm()\nAction not allowed: ${actionName}`;
+    addHistory(`Blocked action: ${actionName}`);
+    updateStatus('Blocked', 'danger');
+    return;
+  }
+
+  resultBox.textContent = `confirm()\nAction approved: ${actionName}\nReason: safe local browser tool / limited scope / no destructive state change.`;
+  addHistory(`Confirmed: ${actionName}`);
+  updateStatus('Confirmed', 'success');
 }
 
 function toolReadPage() {
@@ -153,6 +189,16 @@ function toolNavigate(target) {
 function runLocalAgent(task) {
   const lower = task.toLowerCase();
 
+  if (/(plan|suunnitelma|next step|seuraava)/.test(lower)) {
+    planNextStep();
+    return `plan()\nPlan created. The agent recommends the next step sequence based on the current page context.`;
+  }
+
+  if (/(confirm|varmista|approve|hyväksy)/.test(lower)) {
+    confirmAction('readPage');
+    return `confirm()\nApproval path established. This prototype only allows safe, local browser-side actions.`;
+  }
+
   if (/(navigate|go to|open page|avaa|siirry|sivulle)/.test(lower)) {
     const targetMatch = lower.match(/(home|agent|catalog|autot|tuning|energia|energy|solar|contact|yhteys)/i);
     const target = targetMatch ? targetMatch[1] : 'index.html';
@@ -190,9 +236,11 @@ async function runAgent() {
     return;
   }
 
+  agentMemory.lastTask = task;
+  agentMemory.currentPage = window.location.href;
   updateStatus('Analyzing…', 'warning');
-  const apiKey = document.getElementById('apiKey').value.trim();
 
+  const apiKey = document.getElementById('apiKey').value.trim();
   if (apiKey) {
     try {
       const payload = {
@@ -282,6 +330,9 @@ simulateClickBtn.addEventListener('click', () => {
   resultBox.textContent = localResult;
   addHistory('Simulated CTA click');
   updateStatus('CTA action', 'success');
+});
+planActionBtn.addEventListener('click', () => {
+  planNextStep();
 });
 resetPromptBtn.addEventListener('click', () => {
   agentPrompt.value = '';

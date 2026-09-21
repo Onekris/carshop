@@ -6,7 +6,7 @@
     <title>Nova Agent</title>
     <meta
       name="description"
-      content="A browser-based agent prototype with local page analysis, extraction, navigation, click, and form actions."
+      content="A browser-based agent prototype with plans, local tool execution, action confirmation, and session memory."
     />
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -49,6 +49,8 @@
             <span>clickCTA()</span>
             <span>fillForm()</span>
             <span>navigate()</span>
+            <span>plan()</span>
+            <span>confirm()</span>
           </div>
         </div>
 
@@ -70,11 +72,12 @@
 
         <section class="prompt-panel">
           <label for="agentPrompt">Agent task</label>
-          <textarea id="agentPrompt" rows="5" placeholder="Esim. Kerro minulle mitä sivu tekee, poimi autot ja arvioi parannusehdotukset."></textarea>
+          <textarea id="agentPrompt" rows="5" placeholder="Esim. Selvitä, mitä sivu tekee, poimi autot, tee suunnitelma ja varmista ennen toimenpidettä."></textarea>
           <div class="actions-row">
             <button id="runAgent" class="primary-button">Run agent</button>
             <button id="quickAction" class="secondary-button">Quick inspect</button>
             <button id="simulateClick" class="ghost-button">Click first CTA</button>
+            <button id="planAction" class="ghost-button">Plan next step</button>
             <button id="resetPrompt" class="ghost-button">Reset</button>
           </div>
         </section>
@@ -86,7 +89,7 @@
               <span id="statusBadge" class="status-badge">Ready</span>
             </div>
             <div id="resultBox" class="result-box">
-              <p>Agent is ready. Ask it to inspect the current page, summarize the content, extract data, or trigger a safe local action.</p>
+              <p>Agent is ready. Ask it to inspect the current page, build a plan, extract data, or trigger a safe local action.</p>
             </div>
           </section>
 
