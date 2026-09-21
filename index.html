@@ -1,108 +1,41 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nova Agent</title>
-    <meta
-      name="description"
-      content="A browser-based agent prototype with plans, local tool execution, action confirmation, and session memory."
-    />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <div class="app-shell">
-      <aside class="sidebar">
-        <div class="brand-block">
-          <div class="brand-mark">N</div>
-          <div>
-            <p class="eyebrow">Browser Agent</p>
-            <h1>Nova Agent</h1>
-          </div>
-        </div>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Nova Agent</title>
+  <meta name="description" content="Paikallinen selaimessa toimiva agentti: suunnittelu, työkalut, muisti ja turvallinen suoritus.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">N</span><div><small>Browser Agent</small><h1>Nova Agent</h1></div></div>
+      <nav class="nav" aria-label="Agentin tilat">
+        <button class="nav-item active" data-mode="inspect">Tarkista sivu</button>
+        <button class="nav-item" data-mode="plan">Suunnittele tehtävä</button>
+        <button class="nav-item" data-mode="extract">Poimi tietoja</button>
+        <button class="nav-item" data-mode="audit">Tee auditointi</button>
+      </nav>
+      <section class="side-card"><h3>Työkalut</h3><div class="tools"><span>readPage</span><span>extract</span><span>summarize</span><span>audit</span><span>navigate</span><span>fillForm</span><span>click</span></div></section>
+      <section class="side-card"><h3>Muisti</h3><p id="memoryStats">0 havaintoa · 0 tehtävää</p><button id="clearMemory" class="small-button">Tyhjennä muisti</button></section>
+      <section class="side-card"><h3>Turvallisuus</h3><p class="muted">Agentti ei lähetä lomakkeita, tee maksuja tai poista tietoja ilman erillistä käyttäjän vahvistusta.</p></section>
+    </aside>
 
-        <nav class="nav" aria-label="Agent menu">
-          <button class="nav-item active" data-template="scan">Scan page</button>
-          <button class="nav-item" data-template="summarize">Summarize</button>
-          <button class="nav-item" data-template="extract">Extract data</button>
-          <button class="nav-item" data-template="audit">Audit page</button>
-        </nav>
-
-        <div class="mini-panel">
-          <p class="mini-label">Local pages</p>
-          <div class="page-links">
-            <button class="page-link-btn" data-target="index.html">Agent</button>
-            <button class="page-link-btn" data-target="catalog.html">Catalog</button>
-            <button class="page-link-btn" data-target="tuning.html">Tuning</button>
-            <button class="page-link-btn" data-target="solar.html">Energy</button>
-            <button class="page-link-btn" data-target="contact.html">Contact</button>
-          </div>
-        </div>
-
-        <div class="tool-stack">
-          <p class="mini-label">Tools</p>
-          <div class="tool-list">
-            <span>readPage()</span>
-            <span>extractData()</span>
-            <span>summarize()</span>
-            <span>audit()</span>
-            <span>clickCTA()</span>
-            <span>fillForm()</span>
-            <span>navigate()</span>
-            <span>plan()</span>
-            <span>confirm()</span>
-          </div>
-        </div>
-
-        <div class="settings-card">
-          <label for="apiKey">API key</label>
-          <input id="apiKey" type="password" placeholder="optional" />
-          <small>Local browser tools work without external setup. Optional AI mode can be enabled with a key.</small>
-        </div>
-      </aside>
-
-      <main class="workspace">
-        <header class="topbar">
-          <div>
-            <p class="eyebrow muted">Current page</p>
-            <h2 id="pageTitle">Loading…</h2>
-          </div>
-          <a id="pageLink" class="page-link" href="#" target="_blank" rel="noreferrer">Open page</a>
-        </header>
-
-        <section class="prompt-panel">
-          <label for="agentPrompt">Agent task</label>
-          <textarea id="agentPrompt" rows="5" placeholder="Esim. Selvitä, mitä sivu tekee, poimi autot, tee suunnitelma ja varmista ennen toimenpidettä."></textarea>
-          <div class="actions-row">
-            <button id="runAgent" class="primary-button">Run agent</button>
-            <button id="quickAction" class="secondary-button">Quick inspect</button>
-            <button id="simulateClick" class="ghost-button">Click first CTA</button>
-            <button id="planAction" class="ghost-button">Plan next step</button>
-            <button id="resetPrompt" class="ghost-button">Reset</button>
-          </div>
-        </section>
-
-        <div class="workspace-grid">
-          <section class="result-panel">
-            <div class="result-header">
-              <h3>Agent output</h3>
-              <span id="statusBadge" class="status-badge">Ready</span>
-            </div>
-            <div id="resultBox" class="result-box">
-              <p>Agent is ready. Ask it to inspect the current page, build a plan, extract data, or trigger a safe local action.</p>
-            </div>
-          </section>
-
-          <aside class="history-panel">
-            <div class="history-header">
-              <h3>Session log</h3>
-            </div>
-            <ul id="historyList" class="history-list"></ul>
-          </aside>
-        </div>
-      </main>
-    </div>
-
-    <script src="app.js"></script>
-  </body>
+    <main class="workspace">
+      <header class="topbar"><div><small class="label">Nykyinen sivu</small><h2 id="pageTitle">Nova Agent</h2><p id="pageUrl" class="muted"></p></div><span id="agentState" class="state ready">Valmis</span></header>
+      <section class="task-card">
+        <label for="taskInput">Mitä agentin pitää tehdä?</label>
+        <textarea id="taskInput" rows="4" placeholder="Esim. Poimi tämän sivun autot ja hinnat, tee yhteenveto ja ehdota seuraava turvallinen toimenpide."></textarea>
+        <div class="actions"><button id="runTask" class="primary">Suorita agentti</button><button id="planTask" class="secondary">Luo suunnitelma</button><button id="inspectTask" class="secondary">Pikatarkistus</button></div>
+      </section>
+      <section class="grid">
+        <article class="panel output-panel"><div class="panel-title"><h3>Agentin tulos</h3><button id="copyOutput" class="icon-button">Kopioi</button></div><pre id="output">Agentti on valmis. Anna tehtävä aloittaaksesi.</pre><div id="approval" class="approval hidden"><strong>Vahvistusta tarvitaan</strong><p id="approvalText"></p><button id="approveAction" class="primary">Hyväksy toiminto</button><button id="rejectAction" class="secondary">Hylkää</button></div></article>
+        <aside class="panel"><div class="panel-title"><h3>Suorituksen tila</h3><span id="stepCount">0 vaihetta</span></div><ol id="planList" class="plan-list"><li>Ei aktiivista suunnitelmaa</li></ol><h3 class="subheading">Tapahtumaloki</h3><ul id="logList" class="log-list"></ul></aside>
+      </section>
+      <section class="panel memory-panel"><div class="panel-title"><h3>Oppimismuisti</h3><div><button id="exportMemory" class="icon-button">Vie JSON</button><button id="importMemory" class="icon-button">Tuo JSON</button><input id="memoryFile" type="file" accept="application/json" hidden></div></div><p class="muted">Agentti oppii tässä prototyypissä paikallisista havainnoista, palautteesta ja toistuvista tehtävistä. Tämä ei kouluta mallia uudelleen, vaan parantaa seuraavien tehtävien kontekstia.</p><div id="memoryPreview" class="memory-preview">Muisti on tyhjä.</div></section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
 </html>
